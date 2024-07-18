@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'dart:typed_data';
+import 'dart:io';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
   runApp(MyCameraApp());
 }
 
@@ -16,8 +20,26 @@ class MyCameraApp extends StatelessWidget {
     );
   }
 }
-//pantalla principal
-class HomeScreen extends StatelessWidget {
+
+class HomeScreen extends StatefulWidget {
+  @override
+  _HomeScreenState createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  final ImagePicker _picker = ImagePicker();
+  Uint8List? _imageBytes;
+
+  Future<void> _takePhoto() async {
+    final XFile? photo = await _picker.pickImage(source: ImageSource.camera);
+    if (photo != null) {
+      final bytes = await photo.readAsBytes();
+      setState(() {
+        _imageBytes = bytes;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -29,10 +51,12 @@ class HomeScreen extends StatelessWidget {
         children: [
           Expanded(
             child: Center(
-              child: Text(
-                'Bienvenido, gracias por usar nuestra app',
-                style: TextStyle(fontSize: 24),
-              ),
+              child: _imageBytes == null
+                  ? Text(
+                      'Bienvenido, gracias por usar nuestra app',
+                      style: TextStyle(fontSize: 24),
+                    )
+                  : Image.memory(_imageBytes!),
             ),
           ),
           Padding(
@@ -43,12 +67,7 @@ class HomeScreen extends StatelessWidget {
                   shape: CircleBorder(),
                   padding: EdgeInsets.all(24),
                 ),
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => GalleryScreen()),
-                  );
-                },
+                onPressed: _takePhoto,
                 child: Icon(
                   Icons.camera_alt,
                   size: 30,
@@ -57,24 +76,6 @@ class HomeScreen extends StatelessWidget {
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-//pantalla secundaria
-class GalleryScreen extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Fotos'),
-      ),
-      body: Center(
-        child: Text(
-          //texto segunda pantalla
-          'Galería',
-          style: TextStyle(fontSize: 24),
-        ),
       ),
     );
   }
