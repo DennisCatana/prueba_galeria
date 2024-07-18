@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:typed_data';
-import 'dart:io';
+import 'package:flutter/foundation.dart' show kIsWeb;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -31,7 +31,15 @@ class _HomeScreenState extends State<HomeScreen> {
   Uint8List? _imageBytes;
 
   Future<void> _takePhoto() async {
-    final XFile? photo = await _picker.pickImage(source: ImageSource.camera);
+    XFile? photo;
+    if (kIsWeb) {
+      // Si estamos en la web, usar la cámara
+      photo = await _picker.pickImage(source: ImageSource.camera);
+    } else {
+      // Si estamos en dispositivos móviles, usar la cámara
+      photo = await _picker.pickImage(source: ImageSource.camera);
+    }
+
     if (photo != null) {
       final bytes = await photo.readAsBytes();
       setState(() {
