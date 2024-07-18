@@ -2,9 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:typed_data';
 import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'firebase_options.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   runApp(MyCameraApp());
 }
 
@@ -29,14 +35,13 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final ImagePicker _picker = ImagePicker();
   Uint8List? _imageBytes;
+  bool _isLoading = false;
 
   Future<void> _takePhoto() async {
     XFile? photo;
     if (kIsWeb) {
-      // Si estamos en la web, usar la cámara
       photo = await _picker.pickImage(source: ImageSource.camera);
     } else {
-      // Si estamos en dispositivos móviles, usar la cámara
       photo = await _picker.pickImage(source: ImageSource.camera);
     }
 
@@ -45,6 +50,41 @@ class _HomeScreenState extends State<HomeScreen> {
       setState(() {
         _imageBytes = bytes;
       });
+    }
+  }
+
+  Future<void> _uploadPhoto() async {
+    if (_imageBytes == null) return;
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      // Subir la imagen a Firebase Storage
+      String fileName = DateTime.now().millisecondsSinceEpoch.toString();
+      Reference storageRef =
+          FirebaseStorage.instance.ref().child('photos/$fileName');
+      UploadTask uploadTask = storageRef.putData(_imageBytes!);
+      TaskSnapshot snapshot = await uploadTask;
+      String downloadUrl = await snapshot.ref.getDownloadURL();
+
+      setState(() {
+        _imageBytes = null;
+        _isLoading = false;
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Foto subida exitosamente')),
+      );
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error al subir la foto: $e')),
+      );
     }
   }
 
@@ -67,6 +107,16 @@ class _HomeScreenState extends State<HomeScreen> {
                   : Image.memory(_imageBytes!),
             ),
           ),
+          if (_imageBytes != null)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 16.0),
+              child: ElevatedButton(
+                onPressed: _uploadPhoto,
+                child: _isLoading
+                    ? CircularProgressIndicator()
+                    : Text('Guardar en Firebase'),
+              ),
+            ),
           Padding(
             padding: const EdgeInsets.only(bottom: 16.0),
             child: Center(
