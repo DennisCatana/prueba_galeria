@@ -1,16 +1,9 @@
-# prueba_galeria
+# Prueba grupal
+### Inrtegrantes
+* Cataña Dennis
+* Cocha Iveth
+* Yanacallo Danny
+## Despliegue en Android
+1. Para el despligue en andriod debemos tener el proyecto terminado una vez terminado ejecutamos el siguiente comando **flutter build apk --debug** que nos generará la apk en modo prueba que es como la usaremos por ahora.
+2. 
 
-A new Flutter project.
-
-## Getting Started
-
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
